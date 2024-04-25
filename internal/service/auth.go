@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
-	"github.com/dubrovsky1/gophermart/internal/middleware/logger"
 	"github.com/dubrovsky1/gophermart/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
@@ -19,10 +17,10 @@ const (
 
 type Claims struct {
 	jwt.RegisteredClaims
-	UserID string `json:"userid"`
+	UserID models.UserID `json:"userid"`
 }
 
-func (s *Service) Register(ctx context.Context, user models.User) (string, error) {
+func (s *Service) Register(ctx context.Context, user models.User) (models.UserID, error) {
 	user.Password = generateHashedPassword(user.Password)
 
 	userID, err := s.storage.Register(ctx, user)
@@ -36,13 +34,12 @@ func (s *Service) Register(ctx context.Context, user models.User) (string, error
 		return "", err
 	}
 
-	return token, nil
+	return models.UserID(token), nil
 }
 
-func (s *Service) Login(ctx context.Context, user models.User) (string, error) {
+func (s *Service) Login(ctx context.Context, user models.User) (models.UserID, error) {
 	user.Password = generateHashedPassword(user.Password)
 
-	logger.Sugar.Infow("Service Log", "User", user)
 	userID, err := s.storage.Login(ctx, user)
 	if err != nil {
 		return "", err
@@ -53,7 +50,7 @@ func (s *Service) Login(ctx context.Context, user models.User) (string, error) {
 		return "", err
 	}
 
-	return token, nil
+	return models.UserID(token), nil
 }
 
 func generateHashedPassword(password string) string {
@@ -63,7 +60,7 @@ func generateHashedPassword(password string) string {
 	return "{SHA256}" + base64.StdEncoding.EncodeToString(hashedPassword)
 }
 
-func buildJWTString(userID string) (string, error) {
+func buildJWTString(userID models.UserID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExp)),
@@ -77,24 +74,4 @@ func buildJWTString(userID string) (string, error) {
 	}
 
 	return tokenString, nil
-}
-
-func getUserID(tokenString string) (string, error) {
-	claims := &Claims{}
-
-	token, err := jwt.ParseWithClaims(tokenString, claims,
-		func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
-			}
-			return []byte(SecretKey), nil
-		})
-	if err != nil {
-		return "", err
-	}
-
-	if !token.Valid {
-		return "", err
-	}
-	return claims.UserID, nil
 }

@@ -9,8 +9,14 @@ import (
 )
 
 type Storager interface {
-	Register(context.Context, models.User) (string, error)
-	Login(context.Context, models.User) (string, error)
+	Register(context.Context, models.User) (models.UserID, error)
+	Login(context.Context, models.User) (models.UserID, error)
+	AddOrder(context.Context, models.OrderID, models.UserID) error
+	GetOrderList(context.Context, models.UserID) ([]models.Order, error)
+	GetBalance(context.Context, models.UserID) (models.Balance, error)
+	Withdraw(context.Context, models.OrderID, models.UserID, int) error
+	Withdrawals(context.Context, models.UserID) ([]models.Withdraw, error)
+	GetOrderAccrualInfo(context.Context, models.OrderID) (models.OrderAccrual, error)
 	io.Closer
 }
 

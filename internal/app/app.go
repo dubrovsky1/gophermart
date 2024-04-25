@@ -6,6 +6,8 @@ import (
 	"github.com/dubrovsky1/gophermart/internal/middleware/logger"
 	"github.com/dubrovsky1/gophermart/internal/service"
 	"github.com/dubrovsky1/gophermart/internal/storage"
+	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -23,7 +25,7 @@ type App struct {
 }
 
 func New() *App {
-	cfg := NewConfig(10*time.Second, 1)
+	cfg := NewConfig(10*time.Second, 2)
 
 	return &App{
 		Config: cfg,
@@ -65,24 +67,32 @@ func (a *App) Init() {
 		},
 	}))
 
-	server.POST("/api/user/register", handler.Register)
-	server.POST("/api/user/login", handler.Login)
+	//регистрация и аутентификация доступна всем
+	accessible := server.Group("")
+	{
+		accessible.POST("/api/user/register", handler.Register)
+		accessible.POST("/api/user/login", handler.Login)
+	}
 
-	//registredGroup := server.Group("/api/user")
+	restricted := server.Group("")
+	{
+		config := echojwt.Config{
+			NewClaimsFunc: func(c echo.Context) jwt.Claims {
+				return new(service.Claims)
+			},
+			TokenLookup: "header:Authorization",
+			SigningKey:  []byte(service.SecretKey),
+		}
+		restricted.Use(echojwt.WithConfig(config))
 
-	//config := echojwt.Config{
-	//	NewClaimsFunc: func(c echo.Context) jwt.Claims {
-	//		return new(service.Claims)
-	//	},
-	//	SigningKey: []byte(service.SecretKey),
-	//}
-	//
-	//server.Use(echojwt.WithConfig(config))
+		restricted.POST("/api/user/orders", handler.AddOrder)
+		restricted.GET("/api/user/orders", handler.GetOrderList)
+		restricted.GET("/api/user/balance", handler.GetBalance)
+		restricted.POST("/api/user/balance/withdraw", handler.Withdraw)
+		restricted.GET("/api/user/withdrawals", handler.Withdrawals)
+	}
 
-	//registredGroup.Use(echojwt.WithConfig(config))
-
-	//registredGroup.POST("/register", handler.Register)
-	//registredGroup.POST("/login", handler.Login)
+	server.GET("/api/orders/:number", handler.GetOrderAccrualInfo)
 
 	a.Storage = *stor
 	a.Handler = handler

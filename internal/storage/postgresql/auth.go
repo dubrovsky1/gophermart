@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (s *Storage) Register(ctx context.Context, user models.User) (string, error) {
-	var userID string
+func (s *Storage) Register(ctx context.Context, user models.User) (models.UserID, error) {
+	var userID models.UserID
 	row := s.pool.QueryRow(ctx, "insert into users(userid, login, password) values ($1, $2, $3) returning userid;", user.UserID, user.Login, user.Password)
 
 	err := row.Scan(&userID)
@@ -25,8 +25,8 @@ func (s *Storage) Register(ctx context.Context, user models.User) (string, error
 	return userID, nil
 }
 
-func (s *Storage) Login(ctx context.Context, user models.User) (string, error) {
-	var userID string
+func (s *Storage) Login(ctx context.Context, user models.User) (models.UserID, error) {
+	var userID models.UserID
 	row := s.pool.QueryRow(ctx, "select u.userid from users u where u.login = $1 and u.password = $2;", user.Login, user.Password)
 
 	err := row.Scan(&userID)

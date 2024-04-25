@@ -7,8 +7,10 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.5.5
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/pressly/goose/v3 v3.19.2
+	github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a
 	go.uber.org/zap v1.27.0
 )
 

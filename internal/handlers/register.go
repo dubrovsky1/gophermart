@@ -17,7 +17,7 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	user := models.User{
-		UserID:   uuid.New(),
+		UserID:   models.UserID(uuid.New().String()),
 		Login:    reqBody.Login,
 		Password: reqBody.Password,
 	}
@@ -35,7 +35,7 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Response().Header().Set("Authorization", token)
+	c.Response().Header().Set("Authorization", string(token))
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": token,

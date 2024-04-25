@@ -31,7 +31,7 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Response().Header().Set("Authorization", token)
+	c.Response().Header().Set("Authorization", string(token))
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": token,

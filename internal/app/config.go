@@ -24,7 +24,7 @@ func NewConfig(conn time.Duration, version int64) *Config {
 func (c *Config) ParseFlags() error {
 	a := flag.String("a", "localhost:8080", "address and port to run server")
 	d := flag.String("d", "host=localhost port=5432 user=sa password=admin dbname=gophermart sslmode=disable", "database connection string")
-	f := flag.String("f", "", "accrual system address")
+	f := flag.String("f", "accrual_windows_amd64.exe", "accrual system address")
 
 	flag.Parse()
 
