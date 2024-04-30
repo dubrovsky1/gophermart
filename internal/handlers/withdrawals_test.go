@@ -40,12 +40,12 @@ func TestHandler_Withdrawals(t *testing.T) {
 			error:  nil,
 			withdrawals: []models.Withdraw{
 				{
-					OrderID:     2377225624,
+					OrderID:     "2377225624",
 					Sum:         45,
 					ProcessedAt: "2020-12-09T16:09:57+03:00",
 				},
 				{
-					OrderID:     2377225625,
+					OrderID:     "2377225625",
 					Sum:         119,
 					ProcessedAt: "2024-12-09T16:09:57+03:00",
 				},
@@ -74,7 +74,7 @@ func TestHandler_Withdrawals(t *testing.T) {
 			error: nil,
 			withdrawals: []models.Withdraw{
 				{
-					OrderID:     2377225624,
+					OrderID:     "2377225624",
 					Sum:         45,
 					ProcessedAt: "2020-12-09T16:09:57+03:00",
 				},
@@ -128,7 +128,7 @@ func TestHandler_Withdrawals(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, rec.Code, "Код ответа не совпадает с ожидаемым")
 
 			if rec.Code == http.StatusOK {
-				assert.JSONEq(t, tt.expectedJSON, string(rec.Body.Bytes()), "Тело ответа не совпадает с ожидаемым")
+				assert.JSONEq(t, tt.expectedJSON, rec.Body.String(), "Тело ответа не совпадает с ожидаемым")
 			}
 
 			t.Log("=============================================================================================>")

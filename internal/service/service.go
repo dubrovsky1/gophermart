@@ -6,6 +6,7 @@ import (
 	"github.com/dubrovsky1/gophermart/internal/middleware/logger"
 	"github.com/dubrovsky1/gophermart/internal/models"
 	"github.com/theplant/luhn"
+	"strconv"
 )
 
 //go:generate mockgen -source=service.go -destination=../service/mocks/service.go -package=mocks gophermart/internal/service Storager
@@ -30,7 +31,8 @@ func New(storage Storager) *Service {
 func (s *Service) AddOrder(ctx context.Context, orderID models.OrderID, userID models.UserID) error {
 	logger.Sugar.Infow("Service Add Log", "orderID", orderID, "userID", userID)
 
-	if !luhn.Valid(int(orderID)) {
+	o, _ := strconv.Atoi(string(orderID))
+	if !luhn.Valid(o) {
 		return errs.ErrOrderNum
 	}
 	if err := s.storage.AddOrder(ctx, orderID, userID); err != nil {
@@ -58,7 +60,12 @@ func (s *Service) GetBalance(ctx context.Context, userID models.UserID) (models.
 func (s *Service) Withdraw(ctx context.Context, orderID models.OrderID, userID models.UserID, sum float64) error {
 	logger.Sugar.Infow("Service Withdrawn Log", "orderID", orderID, "userID", userID, "sum", sum)
 
-	if !luhn.Valid(int(orderID)) {
+	o, err := strconv.Atoi(string(orderID))
+	if err != nil {
+		return errs.ErrOrderNum
+	}
+
+	if !luhn.Valid(o) {
 		return errs.ErrOrderNum
 	}
 	if err := s.storage.Withdraw(ctx, orderID, userID, sum); err != nil {

@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -71,7 +70,6 @@ func TestHandler_AddOrder(t *testing.T) {
 		},
 		{
 			name:           "Add order. Body Error.",
-			orderID:        "",
 			userID:         "80600602-efa9-47b5-9919-68d6d982f8be",
 			error:          nil,
 			expectedStatus: http.StatusBadRequest,
@@ -80,8 +78,8 @@ func TestHandler_AddOrder(t *testing.T) {
 			name:           "Add order. orderID Error.",
 			orderID:        "12345678903Dasf4",
 			userID:         "80600602-efa9-47b5-9919-68d6d982f8be",
-			error:          nil,
-			expectedStatus: http.StatusBadRequest,
+			error:          errs.ErrOrderNum,
+			expectedStatus: http.StatusUnprocessableEntity,
 		},
 		{
 			name:           "Add order. User Unauthorized.",
@@ -107,13 +105,11 @@ func TestHandler_AddOrder(t *testing.T) {
 
 			c := s.server.NewContext(req, rec)
 
-			ord, _ := strconv.Atoi(tt.orderID)
-
 			//заглушка для интерфейса Storager, который реализуется в сервисном слое
 			m := mocks.NewMockStorager(s.ctrl)
 
 			//ожидание от интерфейса, реализуемого в сервисе
-			m.EXPECT().AddOrder(c.Request().Context(), models.OrderID(ord), models.UserID(tt.userID)).Return(tt.error).AnyTimes()
+			m.EXPECT().AddOrder(c.Request().Context(), models.OrderID(tt.orderID), models.UserID(tt.userID)).Return(tt.error).AnyTimes()
 
 			serv := service.New(m)
 			handler := New(serv)

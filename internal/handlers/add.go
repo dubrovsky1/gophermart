@@ -9,19 +9,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 func (h *Handler) AddOrder(c echo.Context) error {
-	body, err := io.ReadAll(c.Request().Body)
-	if err != nil {
+	orderID, err := io.ReadAll(c.Request().Body)
+	if err != nil || string(orderID) == "" {
 		return c.NoContent(http.StatusBadRequest) //неверный формат запроса
 	}
 
-	orderID, err := strconv.Atoi(string(body))
-	if err != nil {
-		return c.NoContent(http.StatusBadRequest) //неверный формат запроса
-	}
+	//orderID, err := strconv.Atoi(string(body))
+	//if err != nil {
+	//	return c.NoContent(http.StatusBadRequest) //неверный формат запроса
+	//}
 
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*service.Claims)

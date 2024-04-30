@@ -4,7 +4,7 @@ import "time"
 
 type (
 	UserID  string
-	OrderID int
+	OrderID string
 )
 
 type User struct {
@@ -41,7 +41,7 @@ type Balance struct {
 }
 
 type Withdraw struct {
-	OrderID     OrderID `json:"order,string"`
+	OrderID     OrderID `json:"order"`
 	Sum         float64 `json:"sum"`
 	ProcessedAt string  `json:"processed_at,omitempty"`
 }

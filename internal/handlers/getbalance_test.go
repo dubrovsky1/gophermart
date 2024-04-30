@@ -111,7 +111,7 @@ func TestHandler_GetBalance(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, rec.Code, "Код ответа не совпадает с ожидаемым")
 
 			if rec.Code == http.StatusOK {
-				assert.JSONEq(t, tt.expectedJSON, string(rec.Body.Bytes()), "Тело ответа не совпадает с ожидаемым")
+				assert.JSONEq(t, tt.expectedJSON, rec.Body.String(), "Тело ответа не совпадает с ожидаемым")
 			}
 
 			t.Log("=============================================================================================>")

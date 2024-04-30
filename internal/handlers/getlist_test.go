@@ -40,20 +40,20 @@ func TestHandler_GetOrderList(t *testing.T) {
 			error:  nil,
 			orders: []models.Order{
 				{
-					OrderID: 12345678903,
+					OrderID: "12345678903",
 					Status:  "PROCESSED",
 					Accrual: 500,
 					Upload:  "2024-12-13T15:15:45+03:00",
 				},
 				{
-					OrderID: 2377225624,
+					OrderID: "2377225624",
 					Status:  "PROCESSING",
 					Accrual: 0,
 					Upload:  "2024-12-10T15:15:45+03:00",
 				},
 			},
 			expectedStatus: http.StatusOK,
-			expectedJSON:   `[{"number": 12345678903,"status": "PROCESSED","accrual": 500,"uploaded_at": "2024-12-13T15:15:45+03:00"},{"number": 2377225624,"status": "PROCESSING","uploaded_at": "2024-12-10T15:15:45+03:00"}]`,
+			expectedJSON:   `[{"number": "12345678903","status": "PROCESSED","accrual": 500,"uploaded_at": "2024-12-13T15:15:45+03:00"},{"number": "2377225624","status": "PROCESSING","uploaded_at": "2024-12-10T15:15:45+03:00"}]`,
 		},
 		{
 			name:           "Get list. Not exists orders.",
@@ -125,7 +125,7 @@ func TestHandler_GetOrderList(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, rec.Code, "Код ответа не совпадает с ожидаемым")
 
 			if rec.Code == http.StatusOK {
-				assert.JSONEq(t, tt.expectedJSON, string(rec.Body.Bytes()), "Тело ответа не совпадает с ожидаемым")
+				assert.JSONEq(t, tt.expectedJSON, rec.Body.String(), "Тело ответа не совпадает с ожидаемым")
 			}
 
 			t.Log("=============================================================================================>")
