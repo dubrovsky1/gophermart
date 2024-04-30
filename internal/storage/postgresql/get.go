@@ -5,7 +5,6 @@ import (
 	"github.com/dubrovsky1/gophermart/internal/errs"
 	"github.com/dubrovsky1/gophermart/internal/models"
 	"github.com/jackc/pgx/v5"
-	"strconv"
 	"time"
 )
 
@@ -33,15 +32,12 @@ func (s *Storage) GetOrderList(ctx context.Context, userID models.UserID) ([]mod
 	var orders []models.Order
 
 	for _, item := range result {
-		orderID, _ := strconv.Atoi(item.OrderID)
-
 		order := models.Order{
-			OrderID: models.OrderID(orderID),
+			OrderID: models.OrderID(item.OrderID),
 			Status:  item.Status,
 			Accrual: item.Accrual,
 			Upload:  item.Upload.Format(time.RFC3339),
 		}
-
 		orders = append(orders, order)
 	}
 
@@ -99,14 +95,11 @@ func (s *Storage) Withdrawals(ctx context.Context, userID models.UserID) ([]mode
 	var withdrawals []models.Withdraw
 
 	for _, item := range result {
-		orderID, _ := strconv.Atoi(item.OrderID)
-
 		withdraw := models.Withdraw{
-			OrderID:     models.OrderID(orderID),
+			OrderID:     models.OrderID(item.OrderID),
 			Sum:         item.Sum,
 			ProcessedAt: item.ProcessedAt.Format(time.RFC3339),
 		}
-
 		withdrawals = append(withdrawals, withdraw)
 	}
 

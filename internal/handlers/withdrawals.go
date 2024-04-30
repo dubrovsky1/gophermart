@@ -28,5 +28,7 @@ func (h *Handler) Withdrawals(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	return c.JSON(http.StatusOK, withdrawals)
 }
