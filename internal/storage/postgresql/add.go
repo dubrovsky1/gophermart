@@ -28,7 +28,7 @@ func (s *Storage) AddOrder(ctx context.Context, orderID models.OrderID, userID m
 	return nil
 }
 
-func (s *Storage) Withdraw(ctx context.Context, orderID models.OrderID, userID models.UserID, sum int) error {
+func (s *Storage) Withdraw(ctx context.Context, orderID models.OrderID, userID models.UserID, sum float64) error {
 	balance, err := s.GetBalance(ctx, userID)
 	if err != nil {
 		return err

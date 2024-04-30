@@ -13,7 +13,7 @@ func (h *Handler) Register(c echo.Context) error {
 	reqBody := models.RegisterRequest{}
 
 	if err := c.Bind(&reqBody); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	user := models.User{
@@ -23,16 +23,15 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-
 	token, err := h.service.Register(ctx, user)
 
 	if err != nil {
 		//логин уже занят
 		if errors.Is(err, errs.ErrAlreadyExists) {
-			return echo.NewHTTPError(http.StatusConflict, err.Error())
+			return c.NoContent(http.StatusConflict)
 		}
 		//ошибка сервера
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	c.Response().Header().Set("Authorization", string(token))

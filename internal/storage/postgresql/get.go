@@ -78,7 +78,7 @@ func (s *Storage) GetBalance(ctx context.Context, userID models.UserID) (models.
 }
 
 func (s *Storage) Withdrawals(ctx context.Context, userID models.UserID) ([]models.Withdraw, error) {
-	rows, err := s.pool.Query(ctx, "select (o.orderid, o.accrual, o.uploaded_at) from orders o where o.userid = $1 and o.status = 'PROCESSED' and o.type = 'withdraw' order by o.uploaded_at;", userID)
+	rows, err := s.pool.Query(ctx, "select (o.orderid, o.accrual, o.processed_at) from orders o where o.userid = $1 and o.status = 'PROCESSED' and o.type = 'withdraw' order by o.processed_at;", userID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, errs.ErrNotExists
@@ -102,28 +102,13 @@ func (s *Storage) Withdrawals(ctx context.Context, userID models.UserID) ([]mode
 		orderID, _ := strconv.Atoi(item.OrderID)
 
 		withdraw := models.Withdraw{
-			OrderID: models.OrderID(orderID),
-			Sum:     item.Sum,
-			Upload:  item.Upload.Format(time.RFC3339),
+			OrderID:     models.OrderID(orderID),
+			Sum:         item.Sum,
+			ProcessedAt: item.ProcessedAt.Format(time.RFC3339),
 		}
 
 		withdrawals = append(withdrawals, withdraw)
 	}
 
 	return withdrawals, nil
-}
-
-func (s *Storage) GetOrderAccrualInfo(ctx context.Context, orderID models.OrderID) (models.OrderAccrual, error) {
-	var orderAccrual models.OrderAccrual
-	row := s.pool.QueryRow(ctx, "select o.orderid, o.status, o.accrual from orders o where o.orderid = $1;", orderID)
-
-	err := row.Scan(&orderAccrual.OrderID, &orderAccrual.Status, &orderAccrual.Accrual)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return models.OrderAccrual{}, errs.ErrNotExists
-		}
-		return models.OrderAccrual{}, err
-	}
-
-	return orderAccrual, nil
 }

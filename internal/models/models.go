@@ -14,12 +14,13 @@ type User struct {
 }
 
 type Order struct {
-	OrderID OrderID `json:"number"`
-	UserID  UserID  `json:"userid,omitempty"`
-	Upload  string  `json:"uploaded_at,omitempty"`
-	Type    string  `json:"type,omitempty"`
-	Status  string  `json:"status,omitempty"`
-	Accrual int     `json:"accrual,omitempty"`
+	OrderID     OrderID `json:"number"`
+	UserID      UserID  `json:"userid,omitempty"`
+	Upload      string  `json:"uploaded_at,omitempty"`
+	Type        string  `json:"type,omitempty"`
+	Status      string  `json:"status,omitempty"`
+	Accrual     float64 `json:"accrual,omitempty"`
+	ProcessedAt string  `json:"processed_at,omitempty"`
 }
 
 type RegisterRequest struct {
@@ -30,29 +31,29 @@ type RegisterRequest struct {
 type GetOrderListResult struct {
 	OrderID string    `db:"orderid"`
 	Status  string    `db:"status"`
-	Accrual int       `db:"accrual"`
+	Accrual float64   `db:"accrual"`
 	Upload  time.Time `db:"uploaded_at"`
 }
 
 type Balance struct {
-	Current   int `json:"current"`
-	Withdrawn int `json:"withdrawn"`
+	Current   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
 }
 
 type Withdraw struct {
-	OrderID OrderID `json:"order,string"`
-	Sum     int     `json:"sum"`
-	Upload  string  `json:"processed_at,omitempty"`
+	OrderID     OrderID `json:"order,string"`
+	Sum         float64 `json:"sum"`
+	ProcessedAt string  `json:"processed_at,omitempty"`
 }
 
 type WithdrawListResult struct {
-	OrderID string    `db:"orderid"`
-	Sum     int       `db:"accrual"`
-	Upload  time.Time `db:"uploaded_at"`
+	OrderID     string    `db:"orderid"`
+	Sum         float64   `db:"accrual"`
+	ProcessedAt time.Time `db:"processed_at"`
 }
 
 type OrderAccrual struct {
 	OrderID OrderID `json:"order"`
 	Status  string  `json:"status"`
-	Accrual int     `json:"accrual,omitempty"`
+	Accrual float64 `json:"accrual,omitempty"`
 }

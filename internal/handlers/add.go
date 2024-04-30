@@ -15,31 +15,35 @@ import (
 func (h *Handler) AddOrder(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error()) //неверный формат запроса
+		return c.NoContent(http.StatusBadRequest) //неверный формат запроса
 	}
 
 	orderID, err := strconv.Atoi(string(body))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error()) //неверный формат запроса
+		return c.NoContent(http.StatusBadRequest) //неверный формат запроса
 	}
 
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*service.Claims)
 	userID := claims.UserID
 
+	if userID == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
 	ctx := c.Request().Context()
 
 	err = h.service.AddOrder(ctx, models.OrderID(orderID), userID)
 	if err != nil {
 		if errors.Is(err, errs.ErrOrderAlreadyLoadThisUser) {
-			return echo.NewHTTPError(http.StatusOK, err.Error()) //номер заказа уже был загружен этим пользователем
+			return c.NoContent(http.StatusOK) //номер заказа уже был загружен этим пользователем
 		} else if errors.Is(err, errs.ErrOrderLoadAnotherUser) {
-			return echo.NewHTTPError(http.StatusConflict, err.Error()) //номер заказа уже был загружен другим пользователем
+			return c.NoContent(http.StatusConflict) //номер заказа уже был загружен другим пользователем
 		} else if errors.Is(err, errs.ErrOrderNum) {
-			return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error()) //неверный формат номера заказа
+			return c.NoContent(http.StatusUnprocessableEntity) //неверный формат номера заказа
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()) //внутренняя ошибка сервера
+		return c.NoContent(http.StatusInternalServerError) //внутренняя ошибка сервера
 	}
 
-	return echo.NewHTTPError(http.StatusAccepted)
+	return c.NoContent(http.StatusAccepted)
 }

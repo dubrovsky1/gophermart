@@ -14,15 +14,21 @@ func (h *Handler) GetOrderList(c echo.Context) error {
 	claims := user.Claims.(*service.Claims)
 	userID := claims.UserID
 
+	if userID == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
 	ctx := c.Request().Context()
 
 	orders, err := h.service.GetOrderList(ctx, userID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotExists) {
-			return echo.NewHTTPError(http.StatusNoContent, err.Error())
+			return c.NoContent(http.StatusNoContent)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, orders)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
+
+	return c.JSON(http.StatusOK, orders)
 }

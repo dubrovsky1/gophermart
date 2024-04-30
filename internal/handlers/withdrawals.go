@@ -14,15 +14,19 @@ func (h *Handler) Withdrawals(c echo.Context) error {
 	claims := user.Claims.(*service.Claims)
 	userID := claims.UserID
 
+	if userID == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
 	ctx := c.Request().Context()
 
 	withdrawals, err := h.service.Withdrawals(ctx, userID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotExists) {
-			return echo.NewHTTPError(http.StatusNoContent, err.Error())
+			return c.NoContent(http.StatusNoContent)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, withdrawals)
+	return c.JSON(http.StatusOK, withdrawals)
 }

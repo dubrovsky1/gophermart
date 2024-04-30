@@ -8,3 +8,4 @@ var ErrOrderLoadAnotherUser = errors.New("the order number has already been uplo
 var ErrOrderAlreadyLoadThisUser = errors.New("the order number has already been uploaded by this user")
 var ErrOrderNum = errors.New("invalid order number format")
 var ErrNotEnoughFunds = errors.New("there are not enough funds in the account")
+var ErrInternalServerError = errors.New("internal server error")

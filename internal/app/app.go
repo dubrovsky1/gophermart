@@ -25,7 +25,7 @@ type App struct {
 }
 
 func New() *App {
-	cfg := NewConfig(10*time.Second, 2)
+	cfg := NewConfig(10*time.Second, 1)
 
 	return &App{
 		Config: cfg,
@@ -91,8 +91,6 @@ func (a *App) Init() {
 		restricted.POST("/api/user/balance/withdraw", handler.Withdraw)
 		restricted.GET("/api/user/withdrawals", handler.Withdrawals)
 	}
-
-	server.GET("/api/orders/:number", handler.GetOrderAccrualInfo)
 
 	a.Storage = *stor
 	a.Handler = handler

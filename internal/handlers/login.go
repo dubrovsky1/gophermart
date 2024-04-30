@@ -12,7 +12,7 @@ func (h *Handler) Login(c echo.Context) error {
 	reqBody := models.RegisterRequest{}
 
 	if err := c.Bind(&reqBody); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	user := models.User{
@@ -26,9 +26,9 @@ func (h *Handler) Login(c echo.Context) error {
 	token, err := h.service.Login(ctx, user)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotExists) {
-			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+			return c.NoContent(http.StatusUnauthorized)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	c.Response().Header().Set("Authorization", string(token))

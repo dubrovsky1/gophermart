@@ -8,15 +8,15 @@ import (
 	"github.com/theplant/luhn"
 )
 
+//go:generate mockgen -source=service.go -destination=../service/mocks/service.go -package=mocks gophermart/internal/service Storager
 type Storager interface {
-	Register(context.Context, models.User) (models.UserID, error)
-	Login(context.Context, models.User) (models.UserID, error)
+	Register(context.Context, models.User) (string, error)
+	Login(context.Context, models.User) (string, error)
 	AddOrder(context.Context, models.OrderID, models.UserID) error
 	GetOrderList(context.Context, models.UserID) ([]models.Order, error)
 	GetBalance(context.Context, models.UserID) (models.Balance, error)
-	Withdraw(context.Context, models.OrderID, models.UserID, int) error
+	Withdraw(context.Context, models.OrderID, models.UserID, float64) error
 	Withdrawals(context.Context, models.UserID) ([]models.Withdraw, error)
-	GetOrderAccrualInfo(context.Context, models.OrderID) (models.OrderAccrual, error)
 }
 
 type Service struct {
@@ -55,7 +55,7 @@ func (s *Service) GetBalance(ctx context.Context, userID models.UserID) (models.
 	return balance, nil
 }
 
-func (s *Service) Withdraw(ctx context.Context, orderID models.OrderID, userID models.UserID, sum int) error {
+func (s *Service) Withdraw(ctx context.Context, orderID models.OrderID, userID models.UserID, sum float64) error {
 	logger.Sugar.Infow("Service Withdrawn Log", "orderID", orderID, "userID", userID, "sum", sum)
 
 	if !luhn.Valid(int(orderID)) {
@@ -73,12 +73,4 @@ func (s *Service) Withdrawals(ctx context.Context, userID models.UserID) ([]mode
 		return nil, err
 	}
 	return withdrawals, nil
-}
-
-func (s *Service) GetOrderAccrualInfo(ctx context.Context, orderID models.OrderID) (models.OrderAccrual, error) {
-	orderAccrual, err := s.storage.GetOrderAccrualInfo(ctx, orderID)
-	if err != nil {
-		return models.OrderAccrual{}, err
-	}
-	return orderAccrual, nil
 }

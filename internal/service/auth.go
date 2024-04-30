@@ -20,7 +20,7 @@ type Claims struct {
 	UserID models.UserID `json:"userid"`
 }
 
-func (s *Service) Register(ctx context.Context, user models.User) (models.UserID, error) {
+func (s *Service) Register(ctx context.Context, user models.User) (string, error) {
 	user.Password = generateHashedPassword(user.Password)
 
 	userID, err := s.storage.Register(ctx, user)
@@ -29,15 +29,15 @@ func (s *Service) Register(ctx context.Context, user models.User) (models.UserID
 	}
 
 	//сразу аутентифицируемся после регистрации, передавая в ответе токен с созданным userid
-	token, err := buildJWTString(userID)
+	token, err := BuildJWTString(models.UserID(userID))
 	if err != nil {
 		return "", err
 	}
 
-	return models.UserID(token), nil
+	return token, nil
 }
 
-func (s *Service) Login(ctx context.Context, user models.User) (models.UserID, error) {
+func (s *Service) Login(ctx context.Context, user models.User) (string, error) {
 	user.Password = generateHashedPassword(user.Password)
 
 	userID, err := s.storage.Login(ctx, user)
@@ -45,12 +45,12 @@ func (s *Service) Login(ctx context.Context, user models.User) (models.UserID, e
 		return "", err
 	}
 
-	token, err := buildJWTString(userID)
+	token, err := BuildJWTString(models.UserID(userID))
 	if err != nil {
 		return "", err
 	}
 
-	return models.UserID(token), nil
+	return token, nil
 }
 
 func generateHashedPassword(password string) string {
@@ -60,7 +60,7 @@ func generateHashedPassword(password string) string {
 	return "{SHA256}" + base64.StdEncoding.EncodeToString(hashedPassword)
 }
 
-func buildJWTString(userID models.UserID) (string, error) {
+func BuildJWTString(userID models.UserID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExp)),
